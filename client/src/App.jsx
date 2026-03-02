@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { io } from 'socket.io-client'
 import './App.css'
 
-const socket = io(`http://${window.location.hostname}:3001`)
+const socket = io('https://skyjo-web-game.onrender.com')
 
 function App() {
     const [roomId, setRoomId] = useState('')
