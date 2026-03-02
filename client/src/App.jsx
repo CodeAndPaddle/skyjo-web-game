@@ -16,6 +16,7 @@ function App() {
     useEffect(() => {
         socket.on('room_state_update', (state) => {
             setRoomState(state)
+            setError('') // Refresh/clear instructions whenever the state successfully updates
         })
 
         socket.on('error', (msg) => {
@@ -43,6 +44,12 @@ function App() {
 
     const startGame = () => {
         socket.emit('start_game', roomId)
+    }
+
+    const exitRoom = () => {
+        socket.emit('leave_room', { roomId })
+        setRoomState(null)
+        setRoomId('')
     }
 
     // --- Game Actions ---
@@ -141,8 +148,9 @@ function App() {
                     <img src="/logo.png" alt="Octopus Logo" className="logo" />
                     <h2 style={{ margin: 0 }}>Amelie & Ron Skyjo</h2>
                 </div>
-                <div style={{ padding: '0 20px', fontSize: '1.2rem', color: '#888' }}>
-                    Room: {roomId}
+                <div style={{ padding: '0 20px', fontSize: '1.2rem', color: '#888', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span>Room: {roomId}</span>
+                    <button onClick={exitRoom} className="btn danger" style={{ padding: '0.4rem 0.8rem', fontSize: '0.9rem' }}>Exit Game</button>
                 </div>
                 {roomState.gameState === 'LOBBY' && (
                     <button onClick={startGame} className="btn success">Start Game</button>

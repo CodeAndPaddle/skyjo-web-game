@@ -181,10 +181,26 @@ io.on("connection", (socket) => {
   });
 
 
+  socket.on('leave_room', ({ roomId }) => {
+    const { rooms } = require('./roomManager');
+    const room = rooms[roomId];
+    if (room && room.players.find(p => p.id === socket.id)) {
+      leaveRoom(roomId, socket.id);
+      socket.leave(roomId);
+      io.to(roomId).emit('room_state_update', rooms[roomId]);
+    }
+  });
+
   socket.on('disconnect', () => {
     console.log(`User disconnected: ${socket.id}`);
-    // Basic cleanup - find rooms the user was in and remove them
-    // (Implementation omitted for brevity, but leaveRoom should be called)
+    const { rooms } = require('./roomManager');
+    for (const roomId in rooms) {
+      const room = rooms[roomId];
+      if (room.players.find(p => p.id === socket.id)) {
+        leaveRoom(roomId, socket.id);
+        io.to(roomId).emit('room_state_update', rooms[roomId]);
+      }
+    }
   });
 });
 
