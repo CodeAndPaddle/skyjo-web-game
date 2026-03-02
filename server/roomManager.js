@@ -2,7 +2,7 @@
  * Room and State Manager
  */
 
-const { createDeck, createPlayerGrid } = require('./gameEngine');
+const { createDeck, createPlayerGrid, calculateScore } = require('./gameEngine');
 
 const rooms = {};
 
@@ -42,7 +42,9 @@ function joinRoom(roomId, player) {
         name: player.name,
         grid: [],
         score: 0,
-        isReady: false
+        totalScore: 0,
+        isReady: false,
+        wantsToPlayAgain: false
     });
 
     return { room };
@@ -69,12 +71,66 @@ function startGame(roomId) {
     // Deal 12 cards to each player
     room.players.forEach(player => {
         player.grid = createPlayerGrid(room.deck);
+        player.score = 0; // reset round score
+        player.wantsToPlayAgain = false;
     });
 
     room.currentPlayerIndex = 0;
     room.roundEnderIndex = null;
+    room.winner = null;
 
     return true;
+}
+
+function endRound(roomId) {
+    const room = rooms[roomId];
+    if (!room) return;
+
+    room.gameState = 'ENDED';
+
+    // Reveal all remaining cards and score
+    room.players.forEach(player => {
+        player.grid.forEach(card => {
+            if (card) {
+                card.isFaceUp = true;
+            }
+        });
+        player.score = calculateScore(player.grid);
+    });
+
+    // Check Skyjo Penalty
+    // If the person who ended the round (called Skyjo) does NOT have the strictly lowest score
+    const caller = room.players[room.roundEnderIndex];
+    if (caller) {
+        const isStrictlyLowest = room.players.every(p => {
+            if (p.id === caller.id) return true;
+            return caller.score < p.score;
+        });
+
+        if (!isStrictlyLowest) {
+            caller.score = caller.score > 0 ? caller.score * 2 : (Math.abs(caller.score) * 2) || 15;
+            caller.penaltyApplied = true;
+        } else {
+            caller.penaltyApplied = false;
+        }
+    }
+
+    // Determine winner of the round
+    let lowestScore = Infinity;
+    let winner = null;
+    room.players.forEach(p => {
+        if (p.score < lowestScore) {
+            lowestScore = p.score;
+            winner = p;
+        }
+    });
+
+    room.winner = winner;
+
+    // Accumulate total scores
+    room.players.forEach(p => {
+        p.totalScore += p.score;
+    });
 }
 
 module.exports = {
@@ -83,5 +139,6 @@ module.exports = {
     joinRoom,
     leaveRoom,
     startGame,
+    endRound,
     rooms
 };

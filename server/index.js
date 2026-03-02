@@ -3,8 +3,8 @@ const http = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
 
-const { joinRoom, leaveRoom, startGame, getRoom } = require('./roomManager');
-const { checkColumns, checkRows, removeColumns, removeRows } = require('./gameEngine');
+const { joinRoom, leaveRoom, startGame, getRoom, endRound } = require('./roomManager');
+const { checkColumns, checkRows, removeColumns, removeRows, isGridFullyRevealed } = require('./gameEngine');
 
 const app = express();
 app.use(cors());
@@ -102,9 +102,23 @@ io.on("connection", (socket) => {
       room.discardPile.push(...discards);
     }
 
+    // Check End Round Trigger
+    if (room.roundEnderIndex === null && isGridFullyRevealed(player.grid)) {
+      room.roundEnderIndex = room.currentPlayerIndex;
+      io.to(roomId).emit('skyjo_called', player.name);
+    }
+
     // Next Turn Setup
     room.currentPlayerIndex = (room.currentPlayerIndex + 1) % room.players.length;
-    io.to(roomId).emit('room_state_update', room);
+
+    // Check if round is over
+    if (room.roundEnderIndex !== null && room.currentPlayerIndex === room.roundEnderIndex) {
+      endRound(roomId);
+      io.to(roomId).emit('room_state_update', room);
+      io.to(roomId).emit('game_ended', room.winner);
+    } else {
+      io.to(roomId).emit('room_state_update', room);
+    }
   });
 
   // Action: Discard Drawn Card & Flip a Grid Card
@@ -132,8 +146,38 @@ io.on("connection", (socket) => {
       room.discardPile.push(...discards);
     }
 
+    // Check End Round Trigger
+    if (room.roundEnderIndex === null && isGridFullyRevealed(player.grid)) {
+      room.roundEnderIndex = room.currentPlayerIndex;
+      io.to(roomId).emit('skyjo_called', player.name);
+    }
+
     room.currentPlayerIndex = (room.currentPlayerIndex + 1) % room.players.length;
-    io.to(roomId).emit('room_state_update', room);
+
+    if (room.roundEnderIndex !== null && room.currentPlayerIndex === room.roundEnderIndex) {
+      endRound(roomId);
+      io.to(roomId).emit('room_state_update', room);
+      io.to(roomId).emit('game_ended', room.winner);
+    } else {
+      io.to(roomId).emit('room_state_update', room);
+    }
+  });
+
+  socket.on('vote_play_again', ({ roomId }) => {
+    const room = getRoom(roomId);
+    if (!room) return;
+    const player = room.players.find(p => p.id === socket.id);
+    if (player) {
+      player.wantsToPlayAgain = true;
+      io.to(roomId).emit('room_state_update', room);
+
+      const allReady = room.players.every(p => p.wantsToPlayAgain);
+      if (allReady && room.players.length > 1) {
+        startGame(roomId);
+        io.to(roomId).emit('room_state_update', getRoom(roomId));
+        io.to(roomId).emit('game_started');
+      }
+    }
   });
 
 

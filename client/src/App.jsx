@@ -125,6 +125,17 @@ function App() {
 
     return (
         <div className="game-container">
+            {/* Accumulating Scoreboard */}
+            <div style={{ position: 'absolute', top: '20px', left: '20px', background: 'var(--panel-bg)', padding: '15px', borderRadius: '12px', zIndex: 100, border: '1px solid #30363d' }}>
+                <h3 style={{ margin: '0 0 10px 0', fontSize: '1.2rem', color: 'var(--primary-color)' }}>Scoreboard</h3>
+                {roomState.players.map(p => (
+                    <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', width: '150px', marginBottom: '5px' }}>
+                        <span>{p.name}:</span>
+                        <strong>{p.totalScore || 0}</strong>
+                    </div>
+                ))}
+            </div>
+
             <header className="game-header">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                     <img src="/logo.png" alt="Octopus Logo" className="logo" />
@@ -140,6 +151,44 @@ function App() {
                     {isMyTurn() ? "🟢 YOUR TURN" : `⏳ Waiting for ${roomState.players[roomState.currentPlayerIndex]?.name}`}
                 </div>
             </header>
+
+            {/* SKYJO Called Banner */}
+            {roomState.roundEnderIndex !== null && roomState.gameState === 'PLAYING' && (
+                <div style={{ background: 'var(--primary-color)', color: '#000', padding: '15px', textAlign: 'center', fontSize: '1.5rem', fontWeight: 'bold', width: '100%', borderRadius: '12px', marginTop: '1rem', animation: 'pulse 2s infinite' }}>
+                    📢 SKYJO CALLED BY {roomState.players[roomState.roundEnderIndex].name}! Final Turn for everyone else! 📢
+                </div>
+            )}
+
+            {/* Game Over Modal */}
+            {roomState.gameState === 'ENDED' && roomState.winner && (
+                <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(13, 17, 23, 0.95)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 200, flexDirection: 'column', backdropFilter: 'blur(10px)' }}>
+                    <h1 style={{ fontSize: '4rem', color: 'var(--success-color)', textShadow: '0 0 20px var(--success-color)' }}>{roomState.winner.name} WINS THE ROUND!</h1>
+                    <p style={{ fontSize: '2rem', marginBottom: '2rem' }}>Winning Score: {roomState.winner.score}</p>
+                    <img src="https://media.tenor.com/_u82e4X99_kAAAAM/floss-dance.gif" alt="Floss Dance" style={{ height: '300px', borderRadius: '20px', marginBottom: '2rem' }} />
+
+                    <div style={{ display: 'flex', gap: '20px' }}>
+                        {roomState.players.map(p => (
+                            <div key={p.id} style={{ background: 'var(--panel-bg)', padding: '15px', borderRadius: '12px', textAlign: 'center', border: '1px solid #30363d' }}>
+                                <h3 style={{ margin: 0 }}>{p.name}</h3>
+                                <p style={{ margin: '5px 0' }}>Round Score: {p.score}</p>
+                                {p.penaltyApplied && <p style={{ color: 'var(--danger-color)', margin: '0', fontSize: '0.8rem', fontWeight: 'bold' }}>SKYJO PENALTY (x2)</p>}
+                                <p style={{ color: p.wantsToPlayAgain ? 'var(--success-color)' : '#888', marginTop: '10px' }}>
+                                    {p.wantsToPlayAgain ? '🟢 Ready to Play Again' : '⏳ Waiting...'}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+
+                    <button
+                        className="btn primary"
+                        style={{ marginTop: '3rem', fontSize: '1.5rem', padding: '15px 40px' }}
+                        onClick={() => socket.emit('vote_play_again', { roomId })}
+                        disabled={roomState.players.find(p => p.id === socket.id)?.wantsToPlayAgain}
+                    >
+                        {roomState.players.find(p => p.id === socket.id)?.wantsToPlayAgain ? "Waiting on other player..." : "Play Again"}
+                    </button>
+                </div>
+            )}
 
             {error && <div className="error-banner">{error}</div>}
 

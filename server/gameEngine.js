@@ -147,6 +147,11 @@ function calculateScore(grid) {
     }, 0);
 }
 
+// Helper: Check if grid is fully revealed (triggers end of round)
+function isGridFullyRevealed(grid) {
+    return grid.every(card => card === null || card.isFaceUp);
+}
+
 
 module.exports = {
     createDeck,
@@ -155,5 +160,6 @@ module.exports = {
     checkRows,
     removeColumns,
     removeRows,
-    calculateScore
+    calculateScore,
+    isGridFullyRevealed
 };
