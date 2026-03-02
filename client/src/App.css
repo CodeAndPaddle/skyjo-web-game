@@ -86,14 +86,14 @@ h3 {
 }
 
 .error {
-    color: var(--danger-color);
+    color: var(--primary-color);
     margin-top: 1rem;
     text-align: center;
 }
 
 .error-banner {
-    background: var(--danger-color);
-    color: white;
+    background: var(--primary-color);
+    color: #000;
     padding: 0.5rem;
     border-radius: 8px;
     text-align: center;
@@ -116,6 +116,11 @@ h3 {
     justify-content: space-between;
     align-items: center;
     border: 1px solid #30363d;
+}
+
+.logo {
+    height: 60px;
+    width: auto;
 }
 
 .table-center {
@@ -151,7 +156,7 @@ h3 {
 }
 
 .card.back {
-    background-image: url('/card_back.png');
+    background-image: url('/card_back.jpeg');
     background-size: cover;
     background-position: center;
     color: transparent;

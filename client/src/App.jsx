@@ -99,8 +99,11 @@ function App() {
     if (!roomState) {
         return (
             <div className="lobby-container">
-                <h1>Skyjo Web Game</h1>
-                <form onSubmit={joinRoom} className="join-form">
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px' }}>
+                    <img src="/logo.png" alt="Octopus Logo" className="logo" style={{ height: '80px' }} />
+                    <h1>Skyjo Web Game</h1>
+                </div>
+                <form onSubmit={joinRoom} className="join-form" style={{ marginTop: '1rem' }}>
                     <input
                         value={playerName}
                         onChange={e => setPlayerName(e.target.value)}
@@ -123,11 +126,17 @@ function App() {
     return (
         <div className="game-container">
             <header className="game-header">
-                <h2>Room: {roomId}</h2>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                    <img src="/logo.png" alt="Octopus Logo" className="logo" />
+                    <h2 style={{ margin: 0 }}>Amelie & Ron Skyjo</h2>
+                </div>
+                <div style={{ padding: '0 20px', fontSize: '1.2rem', color: '#888' }}>
+                    Room: {roomId}
+                </div>
                 {roomState.gameState === 'LOBBY' && (
                     <button onClick={startGame} className="btn success">Start Game</button>
                 )}
-                <div className="turn-indicator">
+                <div className="turn-indicator" style={{ marginLeft: 'auto' }}>
                     {isMyTurn() ? "🟢 YOUR TURN" : `⏳ Waiting for ${roomState.players[roomState.currentPlayerIndex]?.name}`}
                 </div>
             </header>
