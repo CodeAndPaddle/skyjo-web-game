@@ -76,7 +76,7 @@ function checkColumns(grid) {
             }
         }
 
-        if (allFaceUp && valuesInCol.length >= 2) {
+        if (allFaceUp && valuesInCol.length > 0) {
             const firstVal = valuesInCol[0];
             const allMatch = valuesInCol.every(v => v === firstVal);
             if (allMatch) {
@@ -107,7 +107,7 @@ function checkRows(grid) {
             }
         }
 
-        if (allFaceUp && valuesInRow.length >= 2) {
+        if (allFaceUp && valuesInRow.length > 0) {
             // Check if all collected values are identical
             const firstVal = valuesInRow[0];
             const allMatch = valuesInRow.every(v => v === firstVal);
@@ -124,10 +124,13 @@ function checkRows(grid) {
 function removeColumns(grid, columns) {
     let discarded = [];
     columns.forEach(col => {
-        discarded.push(grid[col].value, grid[col + 4].value, grid[col + 8].value);
-        grid[col] = null;
-        grid[col + 4] = null;
-        grid[col + 8] = null;
+        for (let row = 0; row < 3; row++) {
+            const idx = row * 4 + col;
+            if (grid[idx] !== null) {
+                discarded.push(grid[idx].value);
+                grid[idx] = null;
+            }
+        }
     });
     return discarded;
 }
