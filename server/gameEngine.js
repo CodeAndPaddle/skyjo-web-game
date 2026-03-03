@@ -57,18 +57,31 @@ function createPlayerGrid(deck) {
 }
 
 // 4. Checking Standard Columns
-// Assuming a 3x4 grid (12 cards) mapped 1D: [0,1,2,3, 4,5,6,7, 8,9,10,11]
+// Assuming a 3x4 grid mapped 1D: [0,1,2,3, 4,5,6,7, 8,9,10,11]
 function checkColumns(grid) {
     let columnsToRemove = [];
     for (let col = 0; col < 4; col++) {
-        const top = grid[col];
-        const mid = grid[col + 4];
-        const bot = grid[col + 8];
+        let valuesInCol = [];
+        let allFaceUp = true;
 
-        if (top && mid && bot &&
-            top.isFaceUp && mid.isFaceUp && bot.isFaceUp &&
-            top.value === mid.value && top.value === bot.value) {
-            columnsToRemove.push(col);
+        for (let row = 0; row < 3; row++) {
+            const index = row * 4 + col;
+            const card = grid[index];
+            if (card !== null) {
+                if (!card.isFaceUp) {
+                    allFaceUp = false;
+                    break;
+                }
+                valuesInCol.push(card.value);
+            }
+        }
+
+        if (allFaceUp && valuesInCol.length >= 2) {
+            const firstVal = valuesInCol[0];
+            const allMatch = valuesInCol.every(v => v === firstVal);
+            if (allMatch) {
+                columnsToRemove.push(col);
+            }
         }
     }
     return columnsToRemove;
@@ -78,11 +91,6 @@ function checkColumns(grid) {
 // Eliminates remaining rows matching on identically revealed cards
 function checkRows(grid) {
     let rowsToRemove = [];
-    // Map grid into active 3x4 layout handling nulls (removed cards)
-    // A row is valid to be removed if ALL its current valid (non-null), face-up cards share a value.
-    // NOTE: A row must have at least 1 card to be "removed". We require > 1 identical cards (or a full row elimination if columns left the row with size 1, up to the user. Standard rule: just must be identical).
-    // The simplest logical implementation matching standard logic:
-    // If all remaining cards in a row are identical and face up, it clears.
     for (let row = 0; row < 3; row++) {
         let valuesInRow = [];
         let allFaceUp = true;
@@ -99,7 +107,7 @@ function checkRows(grid) {
             }
         }
 
-        if (allFaceUp && valuesInRow.length > 0) {
+        if (allFaceUp && valuesInRow.length >= 2) {
             // Check if all collected values are identical
             const firstVal = valuesInRow[0];
             const allMatch = valuesInRow.every(v => v === firstVal);

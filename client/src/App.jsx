@@ -76,6 +76,11 @@ function App() {
         }
 
         if (pendingFlip && drawnCard !== null) {
+            const me = roomState.players.find(p => p.id === socket.id);
+            if (me && me.grid[cardIndex] && me.grid[cardIndex].isFaceUp) {
+                setError('Please tap on a closed card!');
+                return;
+            }
             socket.emit('discard_and_flip', { roomId, discardedCard: drawnCard, flipIndex: cardIndex })
             setDrawnCard(null)
             setPendingFlip(false)
