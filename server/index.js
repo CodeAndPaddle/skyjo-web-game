@@ -16,6 +16,8 @@ const io = new Server(server, {
     origin: "*",
     methods: ["GET", "POST"],
   },
+  pingInterval: 15000,
+  pingTimeout: 30000,
 });
 
 io.on("connection", (socket) => {

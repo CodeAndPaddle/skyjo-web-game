@@ -76,7 +76,7 @@ function checkColumns(grid) {
             }
         }
 
-        if (allFaceUp && valuesInCol.length > 0) {
+        if (allFaceUp && valuesInCol.length >= 2) {
             const firstVal = valuesInCol[0];
             const allMatch = valuesInCol.every(v => v === firstVal);
             if (allMatch) {
@@ -107,7 +107,7 @@ function checkRows(grid) {
             }
         }
 
-        if (allFaceUp && valuesInRow.length > 0) {
+        if (allFaceUp && valuesInRow.length >= 2) {
             // Check if all collected values are identical
             const firstVal = valuesInRow[0];
             const allMatch = valuesInRow.every(v => v === firstVal);

@@ -110,27 +110,29 @@ function App() {
 
     if (!roomState) {
         return (
-            <div className="lobby-container">
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px' }}>
-                    <img src="/logo.png" alt="Octopus Logo" className="logo" style={{ height: '80px' }} />
-                    <h1>Skyjo Web Game</h1>
+            <div className="lobby-wrapper">
+                <div className="lobby-container">
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px' }}>
+                        <img src="/logo.png" alt="Octopus Logo" className="logo" style={{ height: '80px' }} />
+                        <h1>Skyjo Web Game</h1>
+                    </div>
+                    <form onSubmit={joinRoom} className="join-form" style={{ marginTop: '1rem' }}>
+                        <input
+                            value={playerName}
+                            onChange={e => setPlayerName(e.target.value)}
+                            placeholder="Your Name"
+                            className="input-field"
+                        />
+                        <input
+                            value={roomId}
+                            onChange={e => setRoomId(e.target.value)}
+                            placeholder="Room ID"
+                            className="input-field"
+                        />
+                        <button type="submit" className="btn primary">Join Game</button>
+                    </form>
+                    {error && <p className="error">{error}</p>}
                 </div>
-                <form onSubmit={joinRoom} className="join-form" style={{ marginTop: '1rem' }}>
-                    <input
-                        value={playerName}
-                        onChange={e => setPlayerName(e.target.value)}
-                        placeholder="Your Name"
-                        className="input-field"
-                    />
-                    <input
-                        value={roomId}
-                        onChange={e => setRoomId(e.target.value)}
-                        placeholder="Room ID"
-                        className="input-field"
-                    />
-                    <button type="submit" className="btn primary">Join Game</button>
-                </form>
-                {error && <p className="error">{error}</p>}
             </div>
         )
     }
