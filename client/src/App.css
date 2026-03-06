@@ -42,7 +42,7 @@ h3 {
 }
 
 .lobby-container {
-    background: var(--panel-bg);
+    background: rgba(22, 27, 34, 0.2);
     padding: 3rem;
     border-radius: 16px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
